@@ -25,21 +25,37 @@ remove_theme_support( 'genesis-footer-widgets', 1 );
 // Remove the entry meta in the entry footer (requires HTML5 theme support)
 remove_action( 'genesis_entry_footer', 'genesis_post_meta' );
 
-// Remove the header right widget area
+// Remove navigation menus
+remove_theme_support( 'genesis-menus' );
+
+// Unregister sidebars
+unregister_sidebar( 'sidebar' );
 unregister_sidebar( 'header-right' );
+unregister_sidebar( 'sidebar-alt' );
 
 // Remove default sidebar
 remove_action( 'genesis_sidebar', 'genesis_do_sidebar' );
 
-// Unregister secondary sidebar
-unregister_sidebar( 'sidebar-alt' );
-
-// Unregister layout settings
+// Set and unregister layout settings
+add_filter( 'genesis_pre_get_option_site_layout', '__genesis_return_full_width_content' );
 genesis_unregister_layout( 'content-sidebar' );
 genesis_unregister_layout( 'sidebar-content' );
 genesis_unregister_layout( 'content-sidebar-sidebar' );
 genesis_unregister_layout( 'sidebar-content-sidebar' );
 genesis_unregister_layout( 'sidebar-sidebar-content' );
+
+// Remove breadcrumbs
+remove_action('genesis_before_loop', 'genesis_do_breadcrumbs');
+
+// Remove customizer panels
+add_action( 'customize_register', 'gbb_remove_customizer_sections', 20 );
+
+function gbb_remove_customizer_sections() {
+	global $wp_customize;
+	$wp_customize->remove_section( 'genesis_breadcrumbs' );
+	$wp_customize->remove_section( 'genesis_comments' );
+	$wp_customize->remove_section( 'genesis_archives' );
+}
 
 // De-register stylesheet
 remove_action( 'genesis_meta', 'genesis_load_stylesheet' );
@@ -52,6 +68,7 @@ remove_action( 'admin_print_styles', 'print_emoji_styles' );
 
 // Enqueue scripts and styles
 add_action( 'wp_enqueue_scripts', 'gbb_enqueue_scripts_styles' );
+
 function gbb_enqueue_scripts_styles() {
 
 	// Because who wants Superfish?
@@ -63,4 +80,21 @@ function gbb_enqueue_scripts_styles() {
 
 	wp_enqueue_style( $handle, get_stylesheet_directory_uri() . '/style.min.css', false, $version);
 
+}
+
+// Clear out meta boxes
+
+add_action( 'genesis_admin_before_metaboxes', 'gbb_remove_unwanted_genesis_metaboxes' );
+
+function gbb_remove_unwanted_genesis_metaboxes() {
+	remove_meta_box( 'genesis-theme-settings-version', 'toplevel_page_genesis', 'main' );
+	remove_meta_box( 'genesis-theme-settings-feeds', 'toplevel_page_genesis', 'main' );
+	remove_meta_box( 'genesis-theme-settings-layout', 'toplevel_page_genesis', 'main' );
+	remove_meta_box( 'genesis-theme-settings-nav', 'toplevel_page_genesis', 'main' );
+	remove_meta_box( 'genesis-theme-settings-breadcrumb', 'toplevel_page_genesis', 'main' );
+	remove_meta_box( 'genesis-theme-settings-comments', 'toplevel_page_genesis', 'main' );
+	remove_meta_box( 'genesis-theme-settings-posts', 'toplevel_page_genesis', 'main' );
+	remove_meta_box( 'genesis-theme-settings-blogpage', 'toplevel_page_genesis', 'main' );
+	//remove_meta_box( 'genesis-theme-settings-scripts', 'toplevel_page_genesis', 'main' );
+	remove_meta_box( 'genesis-theme-settings-header', 'toplevel_page_genesis', 'main' );
 }
